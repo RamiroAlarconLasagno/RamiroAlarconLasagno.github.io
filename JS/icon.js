@@ -60,7 +60,7 @@ class EmicWidgetIcon extends EmicWidget {
       img.src = this.getAttribute("src");
     } else {
       img.src =
-        "/images/icons/Encendido.png";
+        "/dashboard/ing.ramiro.a.l@gmail.com/Dashboard2/Indoor/images/icons/Encendido.png";
     }
 
     this.ondrop = async (e) => {
@@ -78,11 +78,11 @@ class EmicWidgetIcon extends EmicWidget {
         });
 
         img.src =
-          "/images/icons/" +
+          "/dashboard/ing.ramiro.a.l@gmail.com/Dashboard2/Indoor/images/icons/" +
           files[0].name;
         this.setAttribute(
           "src",
-          "/images/icons/" +
+          "/dashboard/ing.ramiro.a.l@gmail.com/Dashboard2/Indoor/images/icons/" +
             files[0].name
         );
       }
