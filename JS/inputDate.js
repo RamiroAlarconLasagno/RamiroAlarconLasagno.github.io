@@ -49,7 +49,7 @@ class EmicWidgetInputDate extends EmicWidget {
 
     // Si el elemento no tiene un atributo "value", se le asigna un valor por defecto
     if (!this.hasAttribute("value")) {
-      this.setAttribute("value", "2022-01-01"); // Fecha por defecto
+      this.setAttribute("value", "220101"); // Fecha por defecto
     }
 
     this.inputDate.addEventListener("change", this.change);
@@ -58,9 +58,14 @@ class EmicWidgetInputDate extends EmicWidget {
     this.inputDate.addEventListener("change", (event) => {
       console.log("Fecha cambiada", event.target.value);
       console.log("Nombre", this.getAttribute("id"));
-      this.setAttribute("value", event.target.value);
+
+      // Convertir la fecha del formato 'AAAA-MM-DD' al formato 'aaMMDD'
+      let originalDate = event.target.value; 
+      let newFormat = originalDate.slice(2, 4) + originalDate.slice(5, 7) + originalDate.slice(8, 10);
+
+      this.setAttribute("value", newFormat); // Guardar en el nuevo formato
       if (window.inputDateChange)
-        inputDateChange(this.getAttribute("id"), event.target.value);
+        inputDateChange(this.getAttribute("id"), newFormat); // Usar el nuevo formato aquÃ­ tambiÃ©n
     });
 
     super.connectedCallback();
@@ -75,7 +80,13 @@ class EmicWidgetInputDate extends EmicWidget {
     if (typeof this.inputDate == "undefined") return;
     switch (name) {
       case "value":
-        this.inputDate.value = now;
+        // Convertir la fecha del formato 'aaMMDD' al formato 'AAAA-MM-DD'
+        let year = '20' + now.slice(0, 2);   // Asume que estamos en el siglo XXI (aÃ±os 2000)
+        let month = now.slice(2, 4);
+        let day = now.slice(4, 6);
+        let formattedDate = `${year}-${month}-${day}`;
+  
+        this.inputDate.value = formattedDate;
         break;
     }
   }

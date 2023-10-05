@@ -60,7 +60,7 @@ class EmicWidgetIcon extends EmicWidget {
       img.src = this.getAttribute("src");
     } else {
       img.src =
-        "/dashboard/ing.ramiro.a.l@gmail.com/Dashboard2/Indoor/images/icons/Encendido.png";
+        "/dashboard/ing.ramiro.a.l@gmail.com/Dashboard2/Indoor/images/icons/IconoEmicAReemplazar.jpg";
     }
 
     this.ondrop = async (e) => {

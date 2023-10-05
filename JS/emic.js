@@ -545,7 +545,7 @@ function LedIndicadorSetValue(LedIndicadorName, Value) {
 
 function dateSetValue(dateName, value) {
   // ExpresiÃ³n regular para verificar el formato de fecha en ISO (AAAA-MM-DD)
-  var regex = /^\d{4}-\d{2}-\d{2}$/;
+  var regex = /^\d{2}\d{2}\d{2}$/;
   var dName = dateName;
     
   // Este 'if' comprueba si 'dateName' incluye '/',
@@ -593,7 +593,7 @@ function dateSetValue(dateName, value) {
 
 function timeSetValue(timeName, value) {
   // ExpresiÃ³n regular para verificar el formato MM:SS
-  var regex = /^([0-5][0-9]|60):([0-5][0-9]|60)$/;  
+  var regex = /^([01]?[0-9]|2[0-3])([0-5][0-9])([0-5][0-9])$/;  
   var tName = timeName;
   // Este 'if' comprueba si 'timeName' incluye '/',
   // si es asÃ­, entonces actualiza 'tName' para ser la porciÃ³n despuÃ©s de la Ãºltima '/'
@@ -1073,19 +1073,14 @@ function INICIO() {
 	modifyTableDimensions("MOIS1","2","2");
 	addOptionChooserOption("MODER1","Manual","M");
 	addOptionChooserOption("MODER1","Automatico por tiempo","AT");
-	setOptionChooserValue("MODER1","M");
 	addOptionChooserOption("MODER2","Manual","M");
 	addOptionChooserOption("MODER2","Automatico por tiempo","AT");
-	setOptionChooserValue("MODER2","M");
 	addOptionChooserOption("MODER3","Manual","M");
 	addOptionChooserOption("MODER3","Automatico","AV");
-	setOptionChooserValue("MODER3","M");
 	addOptionChooserOption("MODER4","Manual","M");
 	addOptionChooserOption("MODER4","Cronograma semanal","CS");
-	setOptionChooserValue("MODER4","M");
 	addOptionChooserOption("MODER5","Manual","M");
 	addOptionChooserOption("MODER5","Cronograma por ciclos","CC");
-	setOptionChooserValue("MODER5","M");
 	replaceTableCell("MOIS","0","0","Primera medida");
 	replaceTableCell("MOIS","0","1","Segunda medida");
 }
@@ -1100,7 +1095,6 @@ function eMQTTCON() {
 function eMQTT(topic,payload) { 
 	labelSetValue(topic,payload);
 	GaugeSetValue(topic,payload);
-	numSetValue(topic,payload);
 	timeSetValue(topic,payload);
 	dateSetValue(topic,payload);
 	replaceTableMQTT(topic,payload);
@@ -1108,24 +1102,26 @@ function eMQTT(topic,payload) {
 	setOptionChooserValue(topic,payload);
 	SetDataHist(topic,payload);
 	checkboxSetcheck(topic,payload);
+	Segundos=payload;
+	xSele(topic,"INDOOR/"+TextValue+"/download/TIMEOFF1R4",`numSetValue("TiempoEncendidoMin1R4",toint(division(Segundos,"60")))+numSetValue("TiempoEncendidoSec1R4",toint(remainder(Segundos,"60")))`,"INDOOR/"+TextValue+"/download/TIMEOFF2R4",`numSetValue("TiempoEncendidoMin2R4",toint(division(Segundos,"60")))+numSetValue("TiempoEncendidoSec2R4",toint(remainder(Segundos,"60")))`,"INDOOR/"+TextValue+"/download/TIMEOFF3R4",`numSetValue("TiempoEncendidoMin3R4",toint(division(Segundos,"60")))+numSetValue("TiempoEncendidoSec3R4",toint(remainder(Segundos,"60")))`,"INDOOR/"+TextValue+"/download/TIMEOFF4R4",`numSetValue("TiempoEncendidoMin4R4",toint(division(Segundos,"60")))+numSetValue("TiempoEncendidoSec4R4",toint(remainder(Segundos,"60")))`,"INDOOR/"+TextValue+"/download/TIMEOFF5R4",`numSetValue("TiempoEncendidoMin5R4",toint(division(Segundos,"60")))+numSetValue("TiempoEncendidoSec5R4",toint(remainder(Segundos,"60")))`,"INDOOR/"+TextValue+"/download/TIMELAPSER1",`numSetValue("TiempoEsperaMinR1",toint(division(Segundos,"60")))+numSetValue("TiempoEsperaSecR1",toint(remainder(Segundos,"60")))`,"INDOOR/"+TextValue+"/download/TIMELAPSER2",`numSetValue("TiempoEsperaMinR2",toint(division(Segundos,"60")))+numSetValue("TiempoEsperaSecR2",toint(remainder(Segundos,"60")))`);
 }
 function checkboxChange(Checkbox,Checked) { 
-	pMQTT("INDOOR/00001/download/"+Checkbox,Checked);
+	pMQTT("INDOOR/"+TextValue+"/download/"+Checkbox,Checked);
 }
 function optionChooserChange(OptionChooser,Value) { 
-	pMQTT("INDOOR/00001/download/"+OptionChooser,Value);
+	pMQTT("INDOOR/"+TextValue+"/download/"+OptionChooser,Value);
 }
 function inputDateChange(InputDate,Value) { 
-	pMQTT("INDOOR/00001/download/"+InputDate,Value);
+	pMQTT("INDOOR/"+TextValue+"/download/"+InputDate,Value);
 }
 function inputTimeChange(InputTime,Value) { 
-	pMQTT("INDOOR/00001/download/"+InputTime,Value);
+	pMQTT("INDOOR/"+TextValue+"/download/"+InputTime,Value);
 }
 function inputNumChange(InputNum,Value) { 
-	pMQTT("INDOOR/00001/download/"+InputNum,Value);
+	xSele(InputNum,"TiempoEncendidoMin1R4",`pMQTT("INDOOR/"+TextValue+"/download/TIMEOFF1R4",sum(multiplication(numGetValue("TiempoEncendidoMin1R4"),"60"),numGetValue("TiempoEncendidoSec1R4")))`,"TiempoEncendidoSec1R4",`pMQTT("INDOOR/"+TextValue+"/download/TIMEOFF1R4",sum(multiplication(numGetValue("TiempoEncendidoMin1R4"),"60"),numGetValue("TiempoEncendidoSec1R4")))`,"TiempoEncendidoMin2R4",`pMQTT("INDOOR/"+TextValue+"/download/TIMEOFF2R4",sum(multiplication(numGetValue("TiempoEncendidoMin2R4"),"60"),numGetValue("TiempoEncendidoSec2R4")))`,"TiempoEncendidoSec2R4",`pMQTT("INDOOR/"+TextValue+"/download/TIMEOFF2R4",sum(multiplication(numGetValue("TiempoEncendidoMin2R4"),"60"),numGetValue("TiempoEncendidoSec2R4")))`,"TiempoEncendidoMin3R4",`pMQTT("INDOOR/"+TextValue+"/download/TIMEOFF3R4",sum(multiplication(numGetValue("TiempoEncendidoMin3R4"),"60"),numGetValue("TiempoEncendidoSec3R4")))`,"TiempoEncendidoSec3R4",`pMQTT("INDOOR/"+TextValue+"/download/TIMEOFF3R4",sum(multiplication(numGetValue("TiempoEncendidoMin3R4"),"60"),numGetValue("TiempoEncendidoSec3R4")))`,"TiempoEncendidoMin4R4",`pMQTT("INDOOR/"+TextValue+"/download/TIMEOFF4R4",sum(multiplication(numGetValue("TiempoEncendidoMin4R4"),"60"),numGetValue("TiempoEncendidoSec4R4")))`,"TiempoEncendidoSec4R4",`pMQTT("INDOOR/"+TextValue+"/download/TIMEOFF4R4",sum(multiplication(numGetValue("TiempoEncendidoMin4R4"),"60"),numGetValue("TiempoEncendidoSec4R4")))`,"TiempoEncendidoMin5R4",`pMQTT("INDOOR/"+TextValue+"/download/TIMEOFF5R4",sum(multiplication(numGetValue("TiempoEncendidoMin5R4"),"60"),numGetValue("TiempoEncendidoSec5R4")))`,"TiempoEncendidoSec5R4",`pMQTT("INDOOR/"+TextValue+"/download/TIMEOFF5R4",sum(multiplication(numGetValue("TiempoEncendidoMin5R4"),"60"),numGetValue("TiempoEncendidoSec5R4")))`,"TiempoEsperaMinR1",`pMQTT("INDOOR/"+TextValue+"/download/TIMELAPSER1",sum(multiplication(numGetValue("TiempoEsperaMinR1"),"60"),numGetValue("TiempoEsperaSecR1")))`,"TiempoEsperaSecR1",`pMQTT("INDOOR/"+TextValue+"/download/TIMELAPSER1",sum(multiplication(numGetValue("TiempoEsperaMinR1"),"60"),numGetValue("TiempoEsperaSecR1")))`,"TiempoEsperaMinR2",`pMQTT("INDOOR/"+TextValue+"/download/TIMELAPSER2",sum(multiplication(numGetValue("TiempoEsperaMinR2"),"60"),numGetValue("TiempoEsperaSecR2")))`,"TiempoEsperaSecR2",`pMQTT("INDOOR/"+TextValue+"/download/TIMELAPSER2",sum(multiplication(numGetValue("TiempoEsperaMinR2"),"60"),numGetValue("TiempoEsperaSecR2")))`);
 }
 function switchToogle(Switch,Value) { 
-	pMQTT("INDOOR/00001/download/"+Switch,Value);
+	pMQTT("INDOOR/"+TextValue+"/download/"+Switch,Value);
 }
 function textBoxChange(TextBox,Value) { 
 	TextName=TextBox;
@@ -1134,6 +1130,50 @@ function textBoxChange(TextBox,Value) {
 	IDCliente="INDOOR/"+TextValue+"/#";
 	sMQTT(IDCliente);
 }
-var TextName;
+var Segundos;
 var TextValue;
+var TextName;
 var IDCliente;
+
+function xSele(...args) {
+  // Inicializamos una variable para almacenar el resultado
+  let result;
+
+  // Iteramos a travÃ©s de los argumentos empezando desde el segundo (Ã­ndice 1)
+  for (let i = 1; i < args.length; i += 2) {
+    // Convertimos args[i] y args[0] a cadenas (strings)
+    const arg1 = String(args[i]);
+    const arg2 = String(args[0]);
+
+    // Comparamos las cadenas
+    if (arg1 === '*' || arg1 === arg2) {
+      // Utilizamos eval solo si es necesario, de lo contrario, podrÃ­amos simplemente retornar args[i + 1]
+      result = eval(args[i + 1]);
+      break; // Salimos del bucle una vez que encontramos una coincidencia
+    }
+  }
+
+  return result; // Retornamos el resultado
+}
+
+function toint(op1) {
+    const a = parseFloat(op1);
+    const b = parseInt(a);
+    return (b).toString();
+  }
+function division(op1,op2)
+{
+    return (parseFloat(op1) / parseFloat(op2)).toString();
+}
+function remainder(op1,op2)
+{
+    return (parseFloat(op1) % parseFloat(op2)).toString();
+}
+function sum(op1,op2)
+{
+    return (parseFloat(op1) + parseFloat(op2)).toString();
+}
+function multiplication(op1,op2)
+{
+    return (parseFloat(op1) * parseFloat(op2)).toString();
+}

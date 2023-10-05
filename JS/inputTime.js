@@ -45,21 +45,23 @@ class EmicWidgetInputTime extends EmicWidget {
 
     // Si el elemento no tiene un atributo "value", se le asigna un valor por defecto
     if (!this.hasAttribute("value")) {
-      this.setAttribute("value", "00:00");
+      this.setAttribute("value", "000000");
     }
 
     this.shadowRoot.appendChild(this.inputTime);
-
-    //this.inputTime.style = "width:150px; height:40px;";
 
     this.inputTime.addEventListener("change", this.change);
 
     // Agregamos un listener al input para actualizar el atributo "value" cuando cambie
     this.inputTime.addEventListener("change", (event) => {
-      this.setAttribute("value", event.target.value);
-      console.log("change", event.target.value);
-    if (window.inputTimeChange)
-      inputTimeChange(this.getAttribute("id"), event.target.value);
+      // Convertir la hora del formato 'hh:mm' al formato 'hhmmss'
+      let originalTime = event.target.value;
+      let newFormat = originalTime.slice(0, 2) + originalTime.slice(3, 5) + "00"; // Asumimos segundos como '00'
+    
+      this.setAttribute("value", newFormat);
+      console.log("change", newFormat);
+      if (window.inputTimeChange)
+        inputTimeChange(this.getAttribute("id"), newFormat);
     });
 
     super.connectedCallback();
@@ -73,7 +75,12 @@ class EmicWidgetInputTime extends EmicWidget {
     if (typeof this.inputTime == "undefined") return;
     switch (name) {
       case "value":
-        this.inputTime.value = now;
+        // Convertir la hora del formato 'hhmmss' al formato 'hh:mm'
+        let hours = now.slice(0, 2);
+        let minutes = now.slice(2, 4);
+        let formattedTime = `${hours}:${minutes}`;
+  
+        this.inputTime.value = formattedTime;
         break;
     }
   }

@@ -68,17 +68,17 @@ class EmicWidgetInputNum extends EmicWidget {
       }
 
     this.shadowRoot.appendChild(this.inputNum); // AsegÃºrate de que el input tambiÃ©n estÃ© en el shadow DOM
-
-    this.inputNum.addEventListener("change", this.change.bind(this));
+      // Agregamos un listener al input para actualizar el atributo "value" cuando cambie
+    this.inputNum.addEventListener("change", (event) => {
+      this.setAttribute("value", event.target.value);
+      console.log("change", event.target.value);
+    if (window.inputNumChange)
+      inputNumChange(this.getAttribute("id"), event.target.value);
+    });
+    /* this.inputNum.addEventListener("change", this.change.bind(this)); */
     super.connectedCallback();
   }
 
-  change(event) {
-    console.log("change", event.target.value);
-    if (window.inputNumChange)
-      inputNumChange(this.getAttribute("id"), event.target.value);
-    this.setAttribute("value", event.target.value); // Actualizamos el atributo "value"
-  }
 
   static get observedAttributes() {
     return ["value", "max", "min"];
