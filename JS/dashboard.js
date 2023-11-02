@@ -183,7 +183,7 @@ if (customElements.get("emic-dash-panel") === undefined) {
             this.seccion.style['padding'] = '0px';
             this.seccion.style['flex-grow'] = '1';
             this.seccion.style['position'] = 'relative';
-            this.seccion.style.backgroundColor = "#f0f0f0"; 
+            this.seccion.style.backgroundColor = "#DDEBDBFF"; 
 
             this.menu = document.createElement("i");
             this.menu.style = "position: absolute;right:0;right:1;top:0;"
@@ -230,7 +230,7 @@ if (customElements.get("emic-dash-panel") === undefined) {
             if (!this.closest("#areacentral") && !this.closest("#controles"))
             {
                 //this.seccion.style['border'] = '1px solid #003366';
-                this.seccion.style['border'] = '2px solid #008CBA';
+                this.seccion.style['border'] = '2px solid #228b22';
                 this.seccion.style['border-radius'] = '10px';
                 this.seccion.style.boxShadow = "0 4px 8px 0 rgba(0,0,0,0.2)";  // ConfiguraciÃ³n de ejemplo para una sombra
                 this.style = "justify-content: center;display:flex;flex-grow:1;margin:1px"; 
