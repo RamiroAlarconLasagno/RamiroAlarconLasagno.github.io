@@ -421,6 +421,10 @@ console.log("El valor seleccionado es:", valorSeleccionado);
 
 // Esta funciÃ³n establece el valor de un indicador (gauge) en la pÃ¡gina web.
 function GaugeSetValue(gaugeName, value) {
+    // Verifica si 'gaugeName' contiene "/PING/" y si es asÃ­, descarta la funciÃ³n.
+    if (gaugeName.includes('/PING/')) {
+        return;
+    }
     // Normaliza el nombre del indicador eliminando cualquier parte antes de la Ãºltima barra diagonal '/'.
     var gName = gaugeName.includes('/') ? gaugeName.substr(gaugeName.lastIndexOf('/') + 1) : gaugeName;
 
@@ -480,6 +484,10 @@ function IconSetValue(IconName,value){
 
 // Esta funciÃ³n establece el valor de un elemento de etiqueta (label) en la pÃ¡gina web.
 function labelSetValue(labelViewName, value) {
+    // Verifica si 'gaugeName' contiene "/PING/" y si es asÃ­, descarta la funciÃ³n.
+    if (labelViewName.includes('/PING/')) {
+        return;
+    }
     // Normaliza el nombre de la etiqueta eliminando cualquier parte antes de la Ãºltima barra diagonal '/'.
     var lName = labelViewName.includes('/') ? labelViewName.substr(labelViewName.lastIndexOf('/') + 1) : labelViewName;
 	console.log(lName);
@@ -515,13 +523,14 @@ function LedIndicadorSetValue(LedIndicadorName, Value) {
     }
     var element = document.getElementById(tName);
     if (element) {
-        // Si el elemento existe, le asigna el valor 'Value' a su propiedad 'state'
-        element.state = Value;
+        // Si el elemento existe, le asigna el valor 'Value' a su atributo 'state'
+        element.setAttribute('state', Value);
     } 
     else {
         console.log("Led Indicador con id ", tName, " no encontrado");
     }
 }
+
 
 
 //#newRFIcode(_WEB/API/Widgets/InputMinSec/inputMinSec.emic,name=)
@@ -1083,6 +1092,11 @@ function INICIO() {
 	addOptionChooserOption("MODER5","Cronograma por ciclos","CC");
 	replaceTableCell("MOIS","0","0","Primera medida");
 	replaceTableCell("MOIS","0","1","Segunda medida");
+	addOptionChooserOption("CantidadDias","Ultimo dia","1");
+	addOptionChooserOption("CantidadDias","Ultima semana","7");
+	addOptionChooserOption("CantidadDias","Ultimo mes","30");
+	addOptionChooserOption("CantidadDias","Ultimos 3 meses","90");
+	addOptionChooserOption("CantidadDias","Todo","10000");
 }
 function INIVAR() { 
 	MQTTsvr="editor.emic.io";
@@ -1098,6 +1112,7 @@ function eMQTT(topic,payload) {
 	timeSetValue(topic,payload);
 	dateSetValue(topic,payload);
 	replaceTableMQTT(topic,payload);
+	LedIndicadorSetValue(topic,payload);
 	SwitchSetValue(topic,payload);
 	setOptionChooserValue(topic,payload);
 	SetDataHist(topic,payload);

@@ -1,4 +1,5 @@
 
+
 import { EmicWidget } from "./emicWidget.js";
 
 // FunciÃ³n de utilidad para intentar parsear JSON
@@ -13,11 +14,7 @@ function tryParseJSON(str) {
 class EmicWidgetHistorical extends EmicWidget {
   static namesList = {};
   myHistorical;
-  chartCheckInterval;
 
-  //****************************************************************************/
-  //                   MÃ©todo para obtener un nuevo ID
-  //****************************************************************************/
   getNewID() {
     let i;
     for (i = 1; EmicWidgetHistorical.namesList[`historical-${i}`]; i++);
@@ -25,45 +22,40 @@ class EmicWidgetHistorical extends EmicWidget {
     return `historical-${i}`;
   }
 
-  //****************************************************************************/
-  //                               Constructor
-  //****************************************************************************/
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
   }
 
-  //****************************************************************************/
-  //               Cuando el elemento es conectado al DOM
-  //****************************************************************************/
-  // Cuando el elemento es conectado al DOM
   connectedCallback() {
     if (!super.preconnectedCallback("Historical")) {
       return;
     }
-    //------- Agregamos atributos---------------
+
     if (!this.hasAttribute("id")) {
       this.setAttribute("id", this.getNewID());
     }
+
+    if (!this.hasAttribute("widthGraph")) {
+      this.setAttribute("widthGraph", "800px");
+    }
+    if (!this.hasAttribute("heightGraph")) {
+      this.setAttribute("heightGraph", "250px");
+    }
+
     if (!this.hasAttribute("label")) {
-      // CorrecciÃ³n: Establecer un valor mÃ¡s representativo
-      this.setAttribute("label", JSON.stringify(" ")); 
+      this.setAttribute("label", JSON.stringify(" "));
     }
+
     if (!this.hasAttribute("data-labels")) {
-      // CorrecciÃ³n: Establecer un valor mÃ¡s representativo
-      this.setAttribute("data-labels", JSON.stringify(" ")); 
+      this.setAttribute("data-labels", JSON.stringify(" "));
     }
-  
+
     if (!this.hasAttribute("data-values")) {
-      // Establecer valores de ejemplo para los atributos
-      this.setAttribute("data-values", JSON.stringify([
-        [0]]
-        // Agregar mÃ¡s conjuntos de datos si es necesario
-      ));
+      this.setAttribute("data-values", JSON.stringify([[0]]));
     }
-    //------- Fin Agregamos atributos---------------
-  
-    if (typeof Chart === "undefined") {  // VerificaciÃ³n de Chart.js
+
+    if (typeof Highcharts === "undefined") {  // VerificaciÃ³n de Highcharts
       const img = document.createElement("img");
       img.src = "/dashboard/ing.ramiro.a.l@gmail.com/Dashboard2/Indoor/images/icons/grafica.png";
       img.alt = "imagen Emic";
@@ -71,128 +63,151 @@ class EmicWidgetHistorical extends EmicWidget {
       this.shadowRoot.appendChild(img);
     }
     else {
-      // Crear un canvas para el grÃ¡fico
-      this.canvas = document.createElement("canvas");
-  
-      // Aplicar estilo al canvas para agregar un recuadro
-      this.canvas.style.border = "1px solid black";
-      this.canvas.style.padding = "10px";
-      this.canvas.style.backgroundColor = "white";
-      this.canvas.style.width = "800px"; // Puedes ajustar esto a tus necesidades
-      this.canvas.style.height = "250px"; // Puedes ajustar esto a tus necesidades
-  
-      this.shadowRoot.appendChild(this.canvas);
-  
+      // Crear un div para el grÃ¡fico
+      this.chartDiv = document.createElement("div");
+      this.chartDiv.style.width = "800px"; 
+      this.chartDiv.style.height = "250px"; 
+      this.shadowRoot.appendChild(this.chartDiv);
+      
       this.createChart(); // Llamamos a la funciÃ³n para crear el grÃ¡fico
     }
     super.connectedCallback();
   }
-  
-  // FunciÃ³n para crear y configurar el grÃ¡fico utilizando los valores de los atributos
-  createChart() {
-    const labels = tryParseJSON(this.getAttribute("data-labels"));
-    const datasets = tryParseJSON(this.getAttribute("data-values"));
-    const labelNames = tryParseJSON(this.getAttribute("label"));
-    const canvas = this.canvas; // Usamos el canvas previamente creado
-    
-  
-  // Asegurar que el nÃºmero de conjuntos de datos coincida con el nÃºmero de etiquetas
-  while (datasets.length < labelNames.length) {
-    datasets.push([]);
-  }
-  datasets.length = labelNames.length; // Si hay mÃ¡s conjuntos, truncar la cantidad
+  // FunciÃ³n para descargar el grÃ¡fico
 
-    this.chart = new Chart(canvas.getContext("2d"), {
-      type: "line",
-      data: {
-        labels: labels,
-        datasets: datasets.map((data, index) => ({
-          label: labelNames[index], // Usar el nombre correspondiente
-          data: data,
-          fill: true,
-          borderColor: `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`,
-          tension: 0.1,
-        })),
-      },
-      options: {
-        scales: {
-          x: [
-            {
-              ticks: {
-                autoSkip: false,
-                maxRotation: 45, // Rotar las etiquetas en un Ã¡ngulo de 45 grados
-                minRotation: 0,
-              },
-            },
-          ],
+
+  createChart() {
+  const labels = tryParseJSON(this.getAttribute("data-labels"));
+  const datasets = tryParseJSON(this.getAttribute("data-values"));
+  const labelNames = tryParseJSON(this.getAttribute("label"));
+  const chartDiv = this.chartDiv;
+
+  this.chart = Highcharts.chart(chartDiv, {
+    chart: {
+      type: 'line',
+      zoomType: 'xy', // Habilitar el zoom y paneo
+      panKey: 'shift',
+      panning: true,
+      // Agregar la configuraciÃ³n para mover el botÃ³n 'Reset Zoom'
+      resetZoomButton: {
+        position: {
+          align: 'left', 
+          verticalAlign: 'top', 
+          x: 700,
+          y: 210
         },
-      },
-    });
-  }
-  
-  
-  //****************************************************************************/
-  //                               Si hay cambios
-  //****************************************************************************/
-  attributeChangedCallback(name, old, now) {
-    if (old !== now && this.chart) {
-      if (name === "data-labels") {
-        const newLabels = tryParseJSON(now);
-        if (Array.isArray(newLabels)) {
-          this.chart.data.labels = newLabels;
-        } else {
-          console.error("data-labels no es un array vÃ¡lido");
-        }
-      } else if (name === "data-values") {
-        const newValues = tryParseJSON(now);
-        const labelNames = tryParseJSON(this.getAttribute("label"));
-    
-        if (Array.isArray(newValues) && Array.isArray(labelNames)) {
-          if (newValues.length === labelNames.length) {
-            this.chart.data.datasets = newValues.map((data, index) => {
-              return {
-                label: labelNames[index],
-                data: data,
-                fill: false,
-                // Si el Ã­ndice es 0, establece el color a azul. De lo contrario, asigna un color aleatorio.
-                borderColor: index === 0 ? 'rgb(100, 149, 237)' : `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`,
-                tension: 0.1,
-              };
-            });
-          } else {
-            console.error("La longitud de newValues y labelNames debe ser la misma");
-          }
-        } else {
-          console.error("newValues o labelNames no son arrays vÃ¡lidos");
-        }
-      } else if (name === "label") {
-        const labelNames = tryParseJSON(now);
-        if (Array.isArray(labelNames)) {
-          this.chart.data.datasets.forEach((dataset, index) => {
-            dataset.label = labelNames[index];
-          });
-        } else {
-          console.error("label no es un array vÃ¡lido");
+        relativeTo: 'chart'
+      }
+    },
+    exporting: { // Habilitar botones de exportaciÃ³n
+      enabled: true,
+      buttons: {
+        contextButton: { // ConfiguraciÃ³n del botÃ³n contextual
+          menuItems: [
+            'printChart', // Imprimir grÃ¡fico
+            'separator', // Separador
+            'downloadPNG', // Descargar como PNG
+            'downloadJPEG', // Descargar como JPEG
+            'downloadPDF', // Descargar como PDF
+            'downloadSVG' // Descargar como SVG
+          ]
         }
       }
-      this.chart.options.animation = false;
-      this.chart.update();
+    },
+    title: {
+      text: null // Eliminar el tÃ­tulo
+    },
+    xAxis: {
+      categories: labels,
+      labels: {
+        rotation: -30, // Ãngulo de rotaciÃ³n a 0
+        useHTML: true, // Permitir el uso de HTML para mayor control
+        style: {
+          "white-space": "normal" // Permitir saltos de lÃ­nea
+        }
+      }
+    },
+    yAxis: {
+      title: {
+        text: 'Valores'
+      }
+    },
+    exporting: { // Habilitar botones de exportaciÃ³n
+      enabled: true
+    },
+    legend: { // Leyenda interactiva
+      layout: 'vertical',
+      align: 'right',
+      verticalAlign: 'middle',
+      borderWidth: 0,
+      useHTML: true,
+      labelFormatter: function() {
+        return `<div onclick="alert('${this.name}')">${this.name}<div>`;
+      }
+    },
+    series: datasets.map((data, index) => ({
+      name: labelNames[index], 
+      data: data
+    })),
+    plotOptions: {
+      line: {
+        dataLabels: {
+          enabled: true
+        },
+        enableMouseTracking: true,
+        animation: false 
+      }
+    },
+    tooltip: { // Tooltip personalizado
+      formatter: function() {
+        return `<b>${this.series.name}</b><br>${this.x}: ${this.y}`;
+      }
+    }
+  });
+
+}
+
+
+  attributeChangedCallback(name, old, now) {
+    if (old !== now && this.chart) {
+       // Verifica si 'widthGraph' ha cambiado
+       if (name === "widthGraph") {
+        // Actualiza el ancho del canvas
+        if (this.canvas) {
+          this.canvas.style.width = `${now}px`; // Suponiendo que 'now' contiene un valor numÃ©rico
+        }
+        // Actualiza el ancho de la imagen, si existe
+        const img = this.shadowRoot.querySelector("img");
+        if (img) {
+          img.style.width = `${now}px`;
+        }
+      }
       
+      // Verifica si 'heightGraph' ha cambiado
+      if (name === "heightGraph") {
+        // Actualiza la altura del canvas
+        if (this.canvas) {
+          this.canvas.style.height = `${now}px`; // Suponiendo que 'now' contiene un valor numÃ©rico
+        }
+        // Actualiza la altura de la imagen, si existe
+        const img = this.shadowRoot.querySelector("img");
+        if (img) {
+          img.style.height = `${now}px`;
+        }
+      }
+      if (name === "data-labels" || name === "data-values" || name === "label") {
+        this.createChart(); // Simplemente volvemos a crear el grÃ¡fico
+      }
     }
   }
-  
-  
+
   static get observedAttributes() {
-    return ["data-labels", "data-values", "label"];
+    return ["data-labels", "data-values", "label", "widthGraph", "heightGraph"];
   }
   
-  //****************************************************************************/
-  //               Cuando el elemento es desconectado del DOM
-  //****************************************************************************/
   disconnectedCallback() {
-    clearInterval(this.chartCheckInterval);  // Detener el intervalo
+    // No es necesario detener el intervalo en Highcharts
   }
-  
 }
 
 customElements.define("emic-widget-historical", EmicWidgetHistorical);
